@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Крипто Кошелёк • Адаптивный</title>
+    <!-- Имитация иконок (Font Awesome через CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font для современного вида -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b0e14 0%, #1a1f2a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .wallet-card {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(18, 23, 31, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
+            padding: 28px 24px;
+            border: 1px solid rgba(72, 187, 120, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        /* Для ПК чуть шире и изящнее */
+        @media (min-width: 1024px) {
+            .wallet-card {
+                max-width: 560px;
+                padding: 36px 40px;
+                border-radius: 56px;
+            }
+        }
+
+        /* Верхняя панель: сеть + иконка */
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .network-badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 8px 16px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(4px);
+        }
+
+        .network-badge i {
+            color: #3b82f6;
+            font-size: 1rem;
+        }
+
+        .network-badge span {
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+        }
+
+        .menu-icon {
+            color: #a0aec0;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.03);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            transition: 0.2s;
+        }
+
+        .menu-icon:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+        /* Блок баланса — главный акцент */
+        .balance-container {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .balance-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .balance-main {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .balance-amount {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .balance-currency {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #a0bbd9;
+        }
+
+        .balance-secondary {
+            margin-top: 8px;
+            color: #8f9eb5;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .balance-secondary i {
+            color: #48bb78;
+            font-size: 0.9rem;
+        }
+
+        /* Кнопки действий (отправить, получить, купить) */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 24px;
+            padding: 16px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            transition: all 0.15s;
+            cursor: default;
+            backdrop-filter: blur(8px);
+        }
+
+        .action-btn i {
+            font-size: 1.8rem;
+            color: #e2e8f0;
+        }
+
+        .action-btn span {
+            color: #cbd5e0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(72, 187, 120, 0.1);
+            border-color: rgba(72, 187, 120, 0.3);
+        }
+
+        /* Адаптация для мелких телефонов — уменьшаем баланс */
+        @media (max-width: 380px) {
+            .balance-amount {
+                font-size: 2.6rem;
+            }
+            .balance-currency {
+                font-size: 1.4rem;
+            }
+            .action-btn i {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Адрес кошелька (как в мобильных приложениях) */
+        .wallet-address {
+            background: #0f131a;
+            padding: 14px 20px;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            border: 1px solid #2a2f3a;
+        }
+
+        .address-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .address-left i {
+            color: #90cdf4;
+            font-size: 1.2rem;
+        }
+
+        .address-text {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            color: #b9c7da;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            cursor: default;
+        }
+
+        .copy-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Список активов / токенов */
+        .assets-title {
+            display: flex;
+            justify-content: space-between;
+            color: #aab9ce;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .asset-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .asset-item:last-child {
+            border-bottom: none;
+        }
+
+        .asset-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .asset-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .asset-name h4 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 1.05rem;
+        }
+
+        .asset-name span {
+            color: #8896ab;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .asset-balance {
+            text-align: right;
+        }
+
+        .asset-balance .crypto {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .asset-balance .fiat {
+            color: #8896ab;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Нижний графический элемент (общая статистика) */
+        .bottom-stats {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px 20px;
+            border-radius: 28px;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            color: #8e9daf;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            color: #e2e8f0;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .stat-number i {
+            color: #48bb78;
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 24px 0 16px;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #607080;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="wallet-card">
+        <!-- Шапка: сеть + меню -->
+        <div class="wallet-header">
+            <div class="network-badge">
+                <i class="fas fa-link"></i>
+                <span>Ethereum</span>
+            </div>
+            <div class="menu-icon">
+                <i class="fas fa-sliders-h"></i>
+            </div>
+        </div>
+
+        <!-- Основной баланс (крипто) -->
+        <div class="balance-container">
+            <div class="balance-label">Общий баланс</div>
+            <div class="balance-main">
+                <span class="balance-amount">42,578.32</span>
+                <span class="balance-currency">USD</span>
+            </div>
+            <div class="balance-secondary">
+                <i class="fas fa-arrow-up"></i>
+                <span>+2.4%</span>
+                <span style="color: #6f7e93; margin-left: 4px;">($1,024.16)</span>
+            </div>
+        </div>
+
+        <!-- Кнопки быстрых действий -->
+        <div class="action-grid">
+            <div class="action-btn">
+                <i class="fas fa-arrow-up"></i>
+                <span>Отправить</span>
+            </div>
+            <div class="action-btn">
+                <i class="fas fa-arrow-down"></i>
+                <span>Получить</span>
+            </div>
+            <div class="action-btn">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Купить</span>
+            </div>
+        </div>
+
+        <!-- Адрес кошелька (для примера) -->
+        <div class="wallet-address">
+            <div class="address-left">
+                <i class="fas fa-qrcode"></i>
+                <span class="address-text">0x1a2b...3e4f</span>
+            </div>
+            <div class="copy-btn">
+                <i class="far fa-copy"></i>
+                <span style="display: inline;">Копия</span>
+            </div>
+        </div>
+
+        <!-- Заголовок активов + маленькая статистика -->
+        <div class="assets-title">
+            <span>Активы</span>
+            <span style="color: #8bb0e6;"><i class="fas fa-chart-line" style="margin-right: 6px;"></i>$43.2K</span>
+        </div>
+
+        <!-- Список криптовалют с балансами (адаптивный) -->
+        <div class="asset-item">
+            <div class="asset-info">
+                <div class="asset-icon" style="color: #f3ba2f;">
+                    <i class="fab fa-bitcoin"></i>
+                </div>
+                <div class="asset-name">
+                    <h4>Bitcoin</h4>
+                    <span>BTC</span>
+                </div>
+            </div>
+            <div class="asset-balance">
+                <div class="crypto">0.8745 BTC</div>
+                <div class="fiat">$23,614.20</div>
+            </div>
+        </div>
+
+        <div class="asset-item">
+            <div class="asset-info">
+                <div class="asset-icon" style="color: #627eea;">
+                    <i class="fab fa-ethereum"></i>
+                </div>
+                <div class="asset-name">
+                    <h4>Ethereum</h4>
+                    <span>ETH</span>
+                </div>
+            </div>
+            <div class="asset-balance">
+                <div class="crypto">6.234 ETH</div>
+                <div class="fiat">$14,982.10</div>
+            </div>
+        </div>
+
+        <div class="asset-item">
+            <div class="asset-info">
+                <div class="asset-icon" style="color: #3ccf91;">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="asset-name">
+                    <h4>Solana</h4>
+                    <span>SOL</span>
+                </div>
+            </div>
+            <div class="asset-balance">
+                <div class="crypto">45.8 SOL</div>
+                <div class="fiat">$2,815.42</div>
+            </div>
+        </div>
+
+        <div class="asset-item">
+            <div class="asset-info">
+                <div class="asset-icon" style="color: #dodgerblue;">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="asset-name">
+                    <h4>USD Coin</h4>
+                    <span>USDC</span>
+                </div>
+            </div>
+            <div class="asset-balance">
+                <div class="crypto">1,200.00 USDC</div>
+                <div class="fiat">$1,200.00</div>
+            </div>
+        </div>
+
+        <!-- Дополнительная статистика кошелька (адаптивные колонки) -->
+        <hr>
+        <div class="bottom-stats">
+            <div class="stat-item">
+                <span class="stat-label">Портфель</span>
+                <span class="stat-number">7 <span style="font-size: 0.8rem; color: #afc1d6;">активов</span></span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Стейкинг</span>
+                <span class="stat-number">$3.2K <i class="fas fa-arrow-up"></i></span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">NFT</span>
+                <span class="stat-number">12</span>
+            </div>
+        </div>
+        
+        <!-- Маленькая подпись (для красоты) -->
+        <div class="footer-note">
+            <i class="fas fa-shield-alt" style="margin-right: 6px;"></i> Адаптивный криптокошелёк • баланс всегда под контролем
+        </div>
+    </div>
+
+    <!-- Лёгкий интерактив: ничего не отправляем, просто имитация (необязательно) -->
+    <script>
+        (function() {
+            // Небольшой эффект — при нажатии на "Копия" (чисто визуально)
+            const copyBtn = document.querySelector('.copy-btn');
+            if(copyBtn) {
+                copyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i> Скопировано';
+                    this.style.background = 'rgba(72, 187, 120, 0.25)';
+                    this.style.color = '#c6f6d5';
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.style.background = 'rgba(255, 255, 255, 0.06)';
+                        this.style.color = '#b9c7da';
+                    }, 1800);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
